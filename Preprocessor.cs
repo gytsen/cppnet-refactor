@@ -73,7 +73,7 @@ public class Preprocessor : IDisposable {
 			return "<internal-data>";
 		}
 		
-		internal override String getName() {
+		internal override string getName() {
 			return "internal data";
 		}
     }
