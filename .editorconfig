@@ -1,0 +1,15 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+max_line_length = 120
+trim_trailing_whitespace = true
+
+[cs]
+
+# Microsoft .NET properties
+csharp_preferred_modifier_order = override, private, protected, public, file, new, internal, static, abstract, virtual, readonly, sealed, extern, unsafe, volatile, async, required:suggestion

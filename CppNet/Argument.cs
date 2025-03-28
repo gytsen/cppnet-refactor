@@ -27,7 +27,7 @@ namespace CppNet {
 internal class Argument : List<Token> {
 	public const int	NO_ARGS = -1;
 
-	private List<Token>	_expansion;
+	private List<Token>?	_expansion;
 
 	public Argument() {
         this._expansion = null;
