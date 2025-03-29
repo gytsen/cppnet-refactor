@@ -91,6 +91,7 @@ public class TestPreprocessor
     [Fact]
     public void TestExpansion()
     {
+        TestInput("#define A a", Token.EOF);
         TestInput("#define EXPAND(x) x", Token.EOF);
         TestInput("EXPAND(a)", I("a"));
         TestInput("EXPAND(A)", I("a"));
@@ -99,6 +100,7 @@ public class TestPreprocessor
     [Fact]
     public void TestStringification()
     {
+        TestInput("#define A a /* a defined */", Token.EOF);
         TestInput("#define _STRINGIFY(x) #x", Token.EOF);
         TestInput("_STRINGIFY(A)", "A", Token.EOF);
         TestInput("#define STRINGIFY(x) _STRINGIFY(x)", Token.EOF);
@@ -109,19 +111,23 @@ public class TestPreprocessor
     [Fact]
     public void TestConcatenation()
     {
+        TestInput("#define A a /* a defined */", Token.EOF);
+        TestInput("#define B b /* b defined */", Token.EOF);
+        TestInput("#define C c /* c defined */", Token.EOF);
+
         TestInput("#define _CONCAT(x, y) x ## y", Token.EOF);
         TestInput("_CONCAT(A, B)", I("AB"));
         TestInput("#define A_CONCAT done_a_concat\n", Token.EOF);
         TestInput("_CONCAT(A, _CONCAT(B, C))",
                 I("done_a_concat"), '(', I("b"), ',', Token.WHITESPACE, I("c"), ')'
             );
-        TestInput("#define CONCAT(x, y) _CONCAT(x, y)\n", Token.NL);
-        TestInput("CONCAT(A, CONCAT(B, C))\n", I("abc"), Token.NL);
-        TestInput("#define _CONCAT3(x, y, z) x ## y ## z\n", Token.NL);
-        TestInput("_CONCAT3(a, b, c)\n", Token.NL, I("abc"));
-        TestInput("_CONCAT3(A, B, C)\n", Token.NL, I("ABC"));
-        TestInput("_CONCAT(test_, inline)\n", Token.NL, I("test_inline"));
-        TestInput("_CONCAT(test_, \nnewline)\n", Token.NL, I("test_newline"));
+        TestInput("#define CONCAT(x, y) _CONCAT(x, y)", Token.EOF);
+        TestInput("CONCAT(A, CONCAT(B, C))", I("abc"), Token.EOF);
+        TestInput("#define _CONCAT3(x, y, z) x ## y ## z", Token.EOF);
+        TestInput("_CONCAT3(a, b, c)", I("abc"));
+        TestInput("_CONCAT3(A, B, C)", I("ABC"));
+        TestInput("_CONCAT(test_, inline)", I("test_inline"));
+        TestInput("_CONCAT(test_, \nnewline)", I("test_newline"));
     }
 
     private sealed class Identifier
