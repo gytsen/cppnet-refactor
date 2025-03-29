@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Xunit.Abstractions;
+﻿using Xunit.Abstractions;
 namespace CppNet.Tests;
 
 using CppNet;
@@ -26,8 +25,6 @@ public class TestPreprocessor
             Token token = _preprocessor.token();
             _logger.WriteLine($"Token is: {token.ToString()}");
 
-            Type expectedType = expected.GetType();
-
             if (expected is string s)
             {
                 if (token.getType() != Token.STRING)
@@ -44,7 +41,7 @@ public class TestPreprocessor
             }
             else if (expected is char c)
             {
-                Assert.Equal((int)c, token.getType());
+                Assert.Equal(c, token.getType());
             }
             else if (expected is int num)
             {
@@ -128,6 +125,29 @@ public class TestPreprocessor
         TestInput("_CONCAT3(A, B, C)", I("ABC"));
         TestInput("_CONCAT(test_, inline)", I("test_inline"));
         TestInput("_CONCAT(test_, \nnewline)", I("test_newline"));
+    }
+
+    [Fact]
+    public void TestDefinitions()
+    {
+        // TODO: my little idea of just adding string inputs comes to a grinding halt with this,
+        // since #undef skips inputs. We'll have to bite the bullet and see if we can get some kind of consuming
+        // buffer flusher thingy going
+        TestInput("#define two three\n", Token.EOF);
+        TestInput("one /* one */", I("one"), Token.WHITESPACE, Token.CCOMMENT);
+        TestInput("#define one two", Token.EOF);
+        TestInput("one /* three */\n", I("three"), Token.WHITESPACE, Token.CCOMMENT, Token.WHITESPACE);
+        TestInput("#undef two\n", Token.WHITESPACE, Token.EOF);
+        TestInput("#define two five", Token.EOF);
+        TestInput("one /* five */", I("five"), Token.WHITESPACE, Token.CCOMMENT);
+        TestInput("#undef two", Token.EOF);
+        TestInput("one /* two */", I("two"), Token.WHITESPACE, Token.CCOMMENT);
+        TestInput("#undef one", Token.EOF);
+        TestInput("#define one four", Token.EOF);
+        TestInput("one /* four */", I("four"), Token.WHITESPACE, Token.CCOMMENT);
+        TestInput("#undef one", Token.EOF);
+        TestInput("#define one one", Token.EOF);
+        TestInput("one /* one */", I("one"), Token.WHITESPACE, Token.CCOMMENT);
     }
 
     private sealed class Identifier
